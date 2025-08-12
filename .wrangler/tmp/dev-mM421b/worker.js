@@ -1853,12 +1853,29 @@ var viteManifest = {
 };
 
 // src/worker.js
+var DEV = (typeof process !== "undefined" ? "undefined" : void 0) !== "production";
 var VITE_DEV_URL = (typeof process !== "undefined" ? process.env?.VITE_DEV_URL : void 0) || "http://localhost:5173";
 var APP_HTML = `<!doctype html><html lang="en"><head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 %INERTIA_HEAD%
 %ASSET_TAGS%
 </head><body><div id="app" data-page='%INERTIA_PAGE%'></div></body></html>`;
+function devTags() {
+  const base = VITE_DEV_URL;
+  const preamble = `<script type="module">
+import RefreshRuntime from "${base}/@react-refresh";
+RefreshRuntime.injectIntoGlobalHook(window);
+window.$RefreshReg$ = () => {};
+window.$RefreshSig$ = () => (t) => t;
+window.__vite_plugin_react_preamble_installed__ = true;
+<\/script>`;
+  return [
+    preamble,
+    `<script type="module" src="${base}/@vite/client"><\/script>`,
+    `<script type="module" src="${base}/resources/js/app.jsx"><\/script>`
+  ].join("\n");
+}
+__name(devTags, "devTags");
 function prodEntryTags() {
   const entry = viteManifest["resources/js/app.jsx"];
   const css = (entry?.css ?? []).map((h) => `<link rel="stylesheet" href="/${h}">`).join("\n");
@@ -1892,7 +1909,7 @@ function preloadForPage(component) {
 }
 __name(preloadForPage, "preloadForPage");
 function assetTagsFor(component) {
-  return `${prodEntryTags()}
+  return DEV ? devTags() : `${prodEntryTags()}
 ${preloadForPage(component)}`;
 }
 __name(assetTagsFor, "assetTagsFor");
