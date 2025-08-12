@@ -1,0 +1,1 @@
+This folder contains the built output assets for the worker "hono-inertia" generated at 2025-08-12T03:33:04.746Z.
