@@ -5,9 +5,9 @@
   "scripts": {
     "dev:vite": "vite",
     "dev:wrangler": "wrangler dev --local --assets dist --port 8787",
-    "build": "vite build",
-    "test:prod": "vite build && wrangler dev --local -e prod",
-    "deploy": "vite build && wrangler deploy"
+    "build": "vite build && node tools/gen-manifest-module.mjs",
+    "test:prod": "npm run build && wrangler dev --local -e prod",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@inertiajs/core": "^1.0.14",

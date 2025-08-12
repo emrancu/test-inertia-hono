@@ -1,13 +1,9 @@
 name = "hono-inertia"
 main = "src/worker.js"
-compatibility_date = "2025-08-12"
-
-# treat Vite build as public assets
 assets = { directory = "./dist" }
-
-# run prod-path in local
-[env.prod]
-vars = { NODE_ENV = "production" }
 
 [vars]
 VITE_DEV_URL = "http://localhost:5173"
+
+[env.prod.vars]
+NODE_ENV = "production"
