@@ -2,8 +2,8 @@ import { Hono } from 'hono'
 import { serveStatic } from 'hono/cloudflare-workers'
 import { viteManifest } from './manifest.data'
 
-const DEV = false 
-// const DEV = (typeof process !== 'undefined' ? process.env?.NODE_ENV : undefined) !== 'production'
+// const DEV = false 
+const DEV = (typeof process !== 'undefined' ? process.env?.NODE_ENV : undefined) !== 'production'
 const VITE_DEV_URL = (typeof process !== 'undefined' ? process.env?.VITE_DEV_URL : undefined) || 'http://localhost:5173'
 
 const APP_HTML = `<!doctype html><html lang="en"><head>
