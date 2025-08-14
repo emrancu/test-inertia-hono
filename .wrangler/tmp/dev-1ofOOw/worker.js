@@ -1845,7 +1845,7 @@ var upgradeWebSocket = defineWebSocketHelper(async (c, events) => {
 // src/manifest.data.ts
 var viteManifest = {
   "resources/js/app.jsx": {
-    "file": "assets/app-3fXM8OUw.js",
+    "file": "assets/app-Ve_r_8N-.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true
@@ -1853,7 +1853,7 @@ var viteManifest = {
 };
 
 // src/worker.js
-var DEV = (typeof process !== "undefined" ? "undefined" : void 0) !== "production";
+var DEV = false;
 var VITE_DEV_URL = (typeof process !== "undefined" ? process.env?.VITE_DEV_URL : void 0) || "http://localhost:5173";
 var APP_HTML = `<!doctype html><html lang="en"><head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -1991,7 +1991,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-ISAJdn/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-kqlaTd/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -2023,7 +2023,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-ISAJdn/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-kqlaTd/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

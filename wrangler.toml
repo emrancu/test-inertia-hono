@@ -4,6 +4,4 @@ assets = { directory = "./dist" }
 
 [vars]
 VITE_DEV_URL = "http://localhost:5173"
-
-[env.prod.vars]
 NODE_ENV = "production"
