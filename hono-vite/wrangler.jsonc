@@ -2,5 +2,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "flying-worker",
   "compatibility_date": "2025-08-03",
-  "main": "./server.tsx"
+  "main": "./server.ts",
+  "compatibility_flags": ["nodejs_compat"],
+  "kv_namespaces": [
+    {
+      "binding": "kv",
+      "id": "7f2f379205be4f75bda4ac3048d19006"
+    }
+  ]
 }

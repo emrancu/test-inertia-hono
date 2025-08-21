@@ -9,10 +9,15 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
+    "@cloudflare/workers-types": "^4.20250813.0",
+    "bcryptjs": "^3.0.2",
+    "drizzle-orm": "^0.44.4",
     "hono": "^4.9.1"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.2.3",
+    "drizzle-kit": "^0.31.4",
+    "typescript": "^5.9.2",
     "vite": "^6.3.5",
     "vite-ssr-components": "^0.3.0",
     "wrangler": "^4.17.0"

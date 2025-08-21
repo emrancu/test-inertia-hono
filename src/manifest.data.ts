@@ -1,7 +1,7 @@
 // auto-generated
 export const viteManifest = {
   "resources/js/app.jsx": {
-    "file": "assets/app-Ve_r_8N-.js",
+    "file": "assets/app-Cc3MqiR2.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true

@@ -63,7 +63,7 @@ function preloadForPage(component) {
 }
 
 function assetTagsFor(component) {
-  return DEV ? devTags() : `${prodEntryTags()}\n${preloadForPage(component)}`
+  return  `${prodEntryTags()}\n${preloadForPage(component)}`
 }
 
 // --- Inertia helpers ---
