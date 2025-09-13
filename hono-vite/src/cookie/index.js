@@ -19,6 +19,7 @@ export function parseLifetime(duration) {
 			throw new Error("Invalid duration unit");
 	}
 }
+
 export const Cookie = {
 	set: (name, value, maxAge = null) => {
 		const maxAgeValue =

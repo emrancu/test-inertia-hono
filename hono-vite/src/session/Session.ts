@@ -10,9 +10,9 @@ export interface SessionData {
 export class SessionStore {
 	private sessionId: string|undefined;
 	private data: SessionData = {};
- 
 	private kvStore?: any;
-	private isDirty: boolean = false; // Track if data has been modified
+	private isDirty: boolean = false;
+	private isInitialized: boolean = false;
 
 	constructor() {
 		if (App.config.session.driver === "kv") {
@@ -38,6 +38,7 @@ export class SessionStore {
 		}
 
 		if (this.kvStore) {
+			
 			// KV: cookie = session ID, data from KV
 			this.sessionId = sessionCookie || this.generateSessionId();
 			await this.loadFromKV();
@@ -48,6 +49,8 @@ export class SessionStore {
 				this.sessionId = this.generateSessionId();
 			}
 		}
+
+		this.isInitialized = true;
 	}
 
 	/**
@@ -93,14 +96,20 @@ export class SessionStore {
 	 * Set a session value - marks session as dirty
 	 */
 	put(key: string, value: any): void {
+		if (!this.isInitialized) {
+			throw new Error('Session not initialized. Ensure session middleware is applied.');
+		}
 		this.data[key] = value;
-		this.isDirty = true; // Mark as modified
+		this.isDirty = true;
 	}
 
 	/**
 	 * Get a value from session
 	 */
 	get<T = any>(key: string, defaultValue?: T): T {
+		if (!this.isInitialized) {
+			throw new Error('Session not initialized. Ensure session middleware is applied.');
+		}
 		return this.data[key] ?? defaultValue;
 	}
 
@@ -141,29 +150,15 @@ export class SessionStore {
 		return this.sessionId || '';
 	}
 
-	/**
-	 * Check if session has been modified
-	 */
-	private wasModified(): boolean {
-		return this.isDirty;
-	}
 
 	/**
-	 * Check if session has meaningful data
-	 */
-	private hasData(): boolean {
-		return Object.keys(this.data).length > 0;
-	}
-
-	/**
-	 * Save session data - only saves if modified OR if there's data to persist
+	 * Save session data and renew expiry
 	 */
 	async save(): Promise<void> {
-		// Only save if session was modified OR has existing data
-		if (!this.wasModified() && !this.hasData()) {
-			return;
-		}
+		// Clear flash data before saving
+		this.clearFlash();
 
+		// Always save to renew session expiry
 		if (this.kvStore) {
 			await this.saveToKV();
 		} else {
@@ -281,8 +276,23 @@ export class SessionStore {
 
 		return flashData;
 	}
+
+	/**
+	 * Clear all flash data without returning it
+	 */
+	private clearFlash(): void {
+		for (const key in this.data) {
+			if (key.startsWith('_flash.')) {
+				this.forget(key);
+			}
+		}
+	}
 }
 
 export const resolveSession = (): SessionStore => {
-	return App.getContainer().resolve('Session', () => new SessionStore());
+	return App.getContainer().resolve('Session', () => {
+		const session = new SessionStore();
+		// Don't auto-initialize here - middleware handles initialization 
+		return session;
+	});
 };

@@ -1,4 +1,4 @@
-import { deleteCookie, getSignedCookie, setSignedCookie } from "hono/cookie";
+import { deleteCookie, getSignedCookie, setSignedCookie, getCookie, setCookie } from "hono/cookie";
 import { AppRequest } from "../core";
 import { App } from "../core";
 
@@ -32,7 +32,7 @@ export const Cookie = {
 				? parseLifetime(maxAgeValue)
 				: maxAgeValue;
 
-		setSignedCookie(AppRequest.getContext(), name, value, App.config.app.secret, {
+		setSignedCookie(App.getContext(), name, value, App.config.app.secret, {
 			path: App.config.session.path,
 			secure: App.config.session.secure,
 			httpOnly: App.config.session.httpOnly,
@@ -42,15 +42,22 @@ export const Cookie = {
 	},
 
 	get: async (name: string) => {
+		// Try unsigned cookie first for debugging
+		const unsigned = getCookie(App.getContext(), name);
+		if (unsigned) {
+			console.log('Found unsigned cookie:', name, '=', unsigned);
+			return unsigned;
+		}
+		
+		// Fallback to signed cookie
 		const data = await getSignedCookie(
-			AppRequest.getContext(),
+			App.getContext(),
 			App.config.app.secret,
 			name,
 		);
-
 		return data;
 	},
 	delete: (name: string) => {
-		deleteCookie(AppRequest.getContext(), name);
+		deleteCookie(App.getContext(), name);
 	},
 };

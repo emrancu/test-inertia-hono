@@ -21,7 +21,7 @@ export const middlewaresConfig: MiddlewaresConfig = {
 	 */
 	web: [
 		// CsrfToken,
-		Session
+		// Session
 	],
 
 	/**

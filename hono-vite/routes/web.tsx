@@ -15,12 +15,16 @@ import { Context } from "hono";
 import { App } from "../src/core";
 import { Route } from "../src/route";
 import { AppRequest } from "../src/core/request";
-// import {ApiAuth} from "../src/auth";
+  import {Session} from "../src/session";
 
+  import {Cookie} from "../src/cookie";
+  
 
-App.hono.get('/', (c) => {
-	// return   c.json({home: AppRequest.getBaseUrl()})
-    return   c.render(<h1>Hello ss!</h1>)
+App.hono.get('/', async (c) => {
+	Cookie.set("test", "test"); 
+
+	return   c.json({home: await Cookie.get("test")})
+    // return   c.render(<h1>Hello ss!</h1>)
 })
 
 App.hono.get("test-001", async (context: Context) => {
