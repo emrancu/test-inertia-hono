@@ -1,7 +1,9 @@
 name = "hono-inertia"
 main = "src/worker.js"
 assets = { directory = "./dist" }
+compatibility_date = "2025-08-03"
 
 [vars]
 VITE_DEV_URL = "http://localhost:5173"
+#NODE_ENV = "development"
 NODE_ENV = "production"

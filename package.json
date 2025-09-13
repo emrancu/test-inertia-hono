@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev:vite": "vite",
-    "dev:wrangler": "wrangler dev --local --assets dist --port 8787",
+    "dev": "vite & wrangler dev --local --assets dist --port 8787",
+    "dev:vite": "vite", 
     "build": "vite build && node tools/gen-manifest-module.mjs",
     "test:prod": "npm run build && wrangler dev --local -e prod",
     "deploy": "npm run build && wrangler deploy"

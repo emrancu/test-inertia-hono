@@ -29,6 +29,7 @@ window.__vite_plugin_react_preamble_installed__ = true;
 }
 
 function prodEntryTags() {
+
   const entry = viteManifest['resources/js/app.jsx']
   const css = (entry?.css ?? []).map(h => `<link rel="stylesheet" href="/${h}">`).join('\n')
   const js  = entry ? `<script type="module" src="/${entry.file}"></script>` : ''
@@ -63,6 +64,12 @@ function preloadForPage(component) {
 }
 
 function assetTagsFor(component) {
+
+  if (DEV) {
+    return devTags()
+  }
+
+
   return  `${prodEntryTags()}\n${preloadForPage(component)}`
 }
 

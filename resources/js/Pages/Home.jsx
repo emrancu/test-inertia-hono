@@ -8,7 +8,7 @@ export default function Home({ name }) {
     <div style={{ padding: 24 }}>
       <h1>Hello   {name}</h1>
       <button onClick={() => setCount(c => c + 1)}>
-        Count is: {count}
+        Count is sdsd: {count}
       </button>
     </div>
   )
