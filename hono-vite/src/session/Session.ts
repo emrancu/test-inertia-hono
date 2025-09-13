@@ -202,7 +202,7 @@ export class SessionStore {
 				
 			Cookie.set(
 				App.config.session.cookie_name,
-				this.sessionId,
+				this.sessionId!,
 				cookieLifetime
 			);
 		} catch (error) {
