@@ -122,7 +122,7 @@ type SessionConfig = {
 	lifetime: number; // in minute
 	expireOnClose: boolean;
 	lottery: [number, number]; // Tuple representing [probability, outOf]
-	cookie: string;
+	cookie_name: string;
 	path: string;
 	domain?: string; // Optional because it might be undefined
 	secure: boolean | undefined;

@@ -12,7 +12,7 @@ export class SessionManager {
 	private data: SessionData = {};
 	private context: Context;
 	private kvStore?: any;
-	private isModified: boolean = false;
+
 
 	constructor(context: Context, sessionId?: string) {
 		this.context = context;
@@ -67,7 +67,7 @@ export class SessionManager {
 	 */
 	private async loadFromCookie(): Promise<void> {
 		try {
-			const cookieData = await Cookie.get(App.config.session.cookie);
+			const cookieData = await Cookie.get(App.config.session.cookie_name);
 			if (cookieData) {
 				const parsed = JSON.parse(cookieData);
 				if (parsed.sessionId === this.sessionId) {
@@ -82,17 +82,14 @@ export class SessionManager {
 
 	/**
 	 * Save session data
+	 * Always saves to renew session expiration on every request
 	 */
 	async save(): Promise<void> {
-		if (!this.isModified) return;
-
 		if (this.kvStore) {
 			await this.saveToKV();
 		} else {
 			await this.saveToCookie();
 		}
-		
-		this.isModified = false;
 	}
 
 	/**
@@ -100,23 +97,31 @@ export class SessionManager {
 	 */
 	private async saveToKV(): Promise<void> {
 		try {
-			const rememberLogin = await Cookie.get("remember_login");
-			
 			// Parse session lifetime - supports formats like '10m', '10s', '10h', '10d' or plain numbers (minutes)
-			const lifetimeInSeconds = rememberLogin 
-				? parseLifetime("10d") // 10 days for remember login
-				: typeof App.config.session.lifetime === "string" 
-					? parseLifetime(App.config.session.lifetime)
-					: App.config.session.lifetime * 60; // fallback: treat as minutes
+			const lifetimeInSeconds = typeof App.config.session.lifetime === "string" 
+				? parseLifetime(App.config.session.lifetime)
+				: App.config.session.lifetime * 60; // fallback: treat as minutes
 
 			const expirationTime = new Date(Date.now() + lifetimeInSeconds * 1000);
 
+			// 1. Save session data to KV store
 			await this.kvStore.put(
 				`session:${this.sessionId}`,
 				JSON.stringify(this.data),
 				{
 					expiration: Math.floor(expirationTime.getTime() / 1000)
 				}
+			);
+
+			// 2. Save session ID in cookie (browser needs to know the session ID)
+			const cookieLifetime = typeof App.config.session.lifetime === "string" 
+				? App.config.session.lifetime  // Already in format like "2h", "30m"
+				: `${App.config.session.lifetime}m`; // Convert number to minutes format
+				
+			Cookie.set(
+				App.config.session.cookie_name,
+				this.sessionId,
+				cookieLifetime
 			);
 		} catch (error) {
 			console.error("Error saving session to KV:", error);
@@ -134,13 +139,15 @@ export class SessionManager {
 				data: this.data
 			};
 
-			const rememberLogin = await Cookie.get("remember_login");
-			const maxAge = rememberLogin ? "10d" : App.config.session.lifetime;
-
+			// Use configured session lifetime only
+			const cookieLifetime = typeof App.config.session.lifetime === "string" 
+				? App.config.session.lifetime  // Already in format like "2h", "30m"
+				: `${App.config.session.lifetime}m`; // Convert number to minutes format
+				
 			Cookie.set(
-				App.config.session.cookie,
+				App.config.session.cookie_name,
 				JSON.stringify(sessionData),
-				maxAge
+				cookieLifetime
 			);
 		} catch (error) {
 			console.error("Error saving session to cookie:", error);
@@ -160,7 +167,6 @@ export class SessionManager {
 	 */
 	set(key: string, value: any): void {
 		this.data[key] = value;
-		this.isModified = true;
 	}
 
 	/**
@@ -175,7 +181,6 @@ export class SessionManager {
 	 */
 	forget(key: string): void {
 		delete this.data[key];
-		this.isModified = true;
 	}
 
 	/**
@@ -186,7 +191,6 @@ export class SessionManager {
 			this.data._flash = {};
 		}
 		this.data._flash[key] = value;
-		this.isModified = true;
 	}
 
 	/**
@@ -199,7 +203,6 @@ export class SessionManager {
 		
 		const value = this.data._flash[key];
 		delete this.data._flash[key];
-		this.isModified = true;
 		return value;
 	}
 
@@ -215,7 +218,6 @@ export class SessionManager {
 	 */
 	clear(): void {
 		this.data = {};
-		this.isModified = true;
 	}
 
 	/**
@@ -231,9 +233,8 @@ export class SessionManager {
 		}
 		
 		// Always clear the cookie
-		Cookie.delete(App.config.session.cookie);
+		Cookie.delete(App.config.session.cookie_name);
 		this.data = {};
-		this.isModified = false;
 	}
 
 	/**
@@ -259,7 +260,6 @@ export class SessionManager {
 			}
 		}
 		
-		this.isModified = true;
 		await this.save();
 	}
 }

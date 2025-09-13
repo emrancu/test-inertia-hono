@@ -17,13 +17,6 @@ export default class Session extends BaseMiddleware {
 
 	public async boot(context: Context, next: Next) {
 		if (!this.isAvoidPath(context.req.path)) {
-			// ensure remember me token
-			const rememberLogin: string | undefined | false =
-				await Cookie.get("remember_login");
-			if (rememberLogin) {
-				Cookie.set("remember_login", rememberLogin, "10d");
-			}
-
 			// Use our custom session middleware
 			return await sessionMiddleware()(context, next);
 		} else {

@@ -18,10 +18,16 @@ export function sessionMiddleware() {
 		let sessionId: string | undefined;
 		
 		try {
-			const sessionCookie = await Cookie.get(App.config.session.cookie);
+			const sessionCookie = await Cookie.get(App.config.session.cookie_name);
 			if (sessionCookie) {
-				const parsed = JSON.parse(sessionCookie);
-				sessionId = parsed.sessionId;
+				if (App.config.session.driver === "kv") {
+					// In KV mode: cookie contains only session ID
+					sessionId = sessionCookie;
+				} else {
+					// In cookie mode: cookie contains full session data with ID
+					const parsed = JSON.parse(sessionCookie);
+					sessionId = parsed.sessionId;
+				}
 			}
 		} catch (error) {
 			// Invalid session cookie, will create new session
@@ -35,7 +41,7 @@ export function sessionMiddleware() {
 		await session.initialize();
 		
 		// Set session in context
-		context.set(App.config.session.cookie, session);
+		context.set(App.config.session.cookie_name, session);
 		
 		// Process request
 		await next();
@@ -49,7 +55,7 @@ export function sessionMiddleware() {
  * Helper function to get session from context
  */
 export function getSession(): SessionManager {
-	const session = AppRequest.getContext().get(App.config.session.cookie);
+	const session = AppRequest.getContext().get(App.config.session.cookie_name);
 	if (!session) {
 		throw new Error("Session not initialized. Make sure session middleware is applied.");
 	}

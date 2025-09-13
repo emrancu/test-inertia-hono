@@ -34,7 +34,7 @@ export const sessionConfig: SessionConfig = {
     |
     */
 
-	cookie: "session",
+	cookie_name: "session",
 
 	/*
     |--------------------------------------------------------------------------
