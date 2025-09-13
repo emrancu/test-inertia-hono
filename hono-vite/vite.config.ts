@@ -1,10 +1,19 @@
 import { cloudflare } from '@cloudflare/vite-plugin'
 import { defineConfig } from 'vite'
-import ssrPlugin from 'vite-ssr-components/plugin'
+// import ssrPlugin from 'vite-ssr-components/plugin'
+
+
+//
+//    "vite-ssr-components": "^0.3.0",
+
+
 
 export default defineConfig({
   server: {
     cors: false, // disable Vite's built-in CORS setting
   },
-  plugins: [cloudflare(), ssrPlugin()]
+  plugins: [
+      cloudflare(),
+    // ssrPlugin()
+  ]
 })

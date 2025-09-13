@@ -24,6 +24,7 @@ export class SessionManager {
 			this.kvStore = context.env?.[kvBindingName];
 			
 			if (!this.kvStore) {
+
 				console.warn(`KV binding '${kvBindingName}' not found. Session will fall back to cookie storage.`);
 			}
 		}
@@ -34,9 +35,11 @@ export class SessionManager {
 	 */
 	async initialize(): Promise<void> {
 		if (this.kvStore) {
+			console.log("loading from KV")
 			// Load from KV store
 			await this.loadFromKV();
 		} else {
+			console.log("loading from cookie")
 			// Load from cookie
 			await this.loadFromCookie();
 		}
@@ -53,8 +56,12 @@ export class SessionManager {
 	 * Load session data from KV store
 	 */
 	private async loadFromKV(): Promise<void> {
+		
 		try {
 			const data = await this.kvStore.get(`session:${this.sessionId}`, "json");
+
+			console.log("data from KV", data)
+
 			this.data = data || {};
 		} catch (error) {
 			console.error("Error loading session from KV:", error);

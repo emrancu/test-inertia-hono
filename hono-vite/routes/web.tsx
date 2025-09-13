@@ -20,7 +20,7 @@ import { AppRequest } from "../src/core/request";
 
 App.hono.get('/', (c) => {
 	// return   c.json({home: AppRequest.getBaseUrl()})
-	return   c.render(<h1>Hello ss!</h1>)
+    return   c.render(<h1>Hello ss!</h1>)
 })
 
 App.hono.get("test-001", async (context: Context) => {
