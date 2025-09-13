@@ -21,9 +21,9 @@ import { AppRequest } from "../src/core/request";
   
 
 App.hono.get('/', async (c) => {
-	Cookie.set("test", "test"); 
+	 Session.put("test", "test sdsd"); 
 
-	return   c.json({home: await Cookie.get("test")})
+	return   c.json({home: await Session.get("test")})
     // return   c.render(<h1>Hello ss!</h1>)
 })
 
