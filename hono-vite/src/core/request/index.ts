@@ -295,3 +295,4 @@ export function getRequest(): RequestData {
 
 	return AppRequest;
 }
+

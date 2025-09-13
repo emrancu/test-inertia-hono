@@ -60,8 +60,6 @@ export class SessionManager {
 		try {
 			const data = await this.kvStore.get(`session:${this.sessionId}`, "json");
 
-			console.log("data from KV", data)
-
 			this.data = data || {};
 		} catch (error) {
 			console.error("Error loading session from KV:", error);
