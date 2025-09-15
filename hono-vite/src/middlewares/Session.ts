@@ -18,6 +18,8 @@ export default class Session extends BaseMiddleware {
 	public async boot(context: Context, next: Next) {
 		if (!this.isAvoidPath(context.req.path)) {
 			// Use our custom session middleware
+			App.addToCurrentState("is_active_session_middleware", true);
+
 			return await sessionMiddleware()(context, next);
 		} else {
 			await next();

@@ -8,13 +8,10 @@ import { CsrfTokenConfig } from "../src/type-declaration";
  */
 export const CsrfConfig: CsrfTokenConfig = {
 	origin: "same",
-	except: [], // except routes
+	avoidPath: ['/api/*'], // except routes
 	allowedOrigins: [
 		"http://localhost:8787",
 		"https://localhost:8787",
-		// Add your production domains here
-		// "https://yourdomain.com",
-		// "https://www.yourdomain.com"
 	],
 	validateUserAgent: true, // Block suspicious user agents (curl, wget, etc.)
 	rateLimit: {

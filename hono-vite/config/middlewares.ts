@@ -20,8 +20,8 @@ export const middlewaresConfig: MiddlewaresConfig = {
 	 * middleware for web routes except 'api/*' routes
 	 */
 	web: [
-		// CsrfToken,
-		Session
+		Session,
+		CsrfToken,
 	],
 
 	/**
