@@ -1,9 +1,9 @@
 import type { Context, Next } from "hono";
+import { cors } from 'hono/cors';
 import { Cookie } from "../cookie";
 import { App, AppRequest } from "../core";
 import BaseMiddleware from "../core/abstraction/BaseMiddleware";
 import { Session } from "../session";
-import { csrf } from 'hono/csrf'
 
 export default class CsrfToken extends BaseMiddleware {
 
@@ -16,6 +16,19 @@ export default class CsrfToken extends BaseMiddleware {
 			return path === pattern;
 		});
 	};
+
+	/**
+	 * Get allowed origins for CORS (reused from CSRF validation)
+	 */
+	private getAllowedOrigins(context: Context): string[] {
+		const host = context.req.header("Host");
+		return App.config.csrf.allowedOrigins || [
+			`http://${host}`,
+			`https://${host}`,
+			`http://localhost:8787`,
+			`https://localhost:8787`
+		];
+	}
 
 	/**
 	 * Validate request origin to prevent simple CSRF attacks (Laravel-style)
@@ -121,71 +134,81 @@ export default class CsrfToken extends BaseMiddleware {
 			return;
 		}
 
-		// Skip CSRF for GET/HEAD/OPTIONS or excluded paths
-		if (["GET", "HEAD", "OPTIONS"].includes(context.req.method) || 
-			this.isExceptPath(context.req.path)) {
-			// Still generate token for GET requests so forms can use it
-			const csrfToken = this.ensureSessionToken();
+		// Apply CORS middleware first
+		const corsHandler = cors({
+			origin: App.config.cors?.origin || this.getAllowedOrigins(context),
+			allowMethods: App.config.cors?.allowMethods || ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
+			allowHeaders: App.config.cors?.allowHeaders || [
+				'X-CSRF-TOKEN', 
+				'X-XSRF-TOKEN', 
+				'Content-Type', 
+				'Authorization',
+				'X-Requested-With'
+			],
+			exposeHeaders: App.config.cors?.exposeHeaders || ['X-CSRF-TOKEN'],
+			credentials: App.config.cors?.credentials ?? true,
+			maxAge: App.config.cors?.maxAge || 86400
+		});
 
+		// Apply CORS first, then handle CSRF
+		await corsHandler(context, async () => {
+			// Skip CSRF for GET/HEAD/OPTIONS or excluded paths
+			if (["GET", "HEAD", "OPTIONS"].includes(context.req.method) || 
+				this.isExceptPath(context.req.path)) {
+				// Still generate token for GET requests so forms can use it
+				const csrfToken = this.ensureSessionToken();
+				App.addToCurrentState("csrfToken", csrfToken);
+				await next();
+				return;
+			}
+
+			// For state-changing requests (POST, PUT, DELETE, PATCH)
+			const isStateChanging = ["POST", "PUT", "DELETE", "PATCH"].includes(context.req.method);
+
+			if (isStateChanging) {
+				// 1. Origin/Referer validation (primary CSRF defense)
+				if (!this.validateOrigin(context)) {
+					throw new Error('CSRF_ORIGIN_MISMATCH');
+				}
+
+				// 2. Token validation (double-submit cookie pattern)
+				const sessionToken = Session.get('_token');
+				const requestToken = this.getTokenFromRequest(context);
+
+				if (!sessionToken || !requestToken) {
+					throw new Error('CSRF_TOKEN_MISSING');
+				}
+
+				// Timing-safe comparison (prevent timing attacks)
+				if (!this.timingSafeEquals(sessionToken, requestToken)) {
+					// Log potential attack
+					console.warn('CSRF token mismatch:', {
+						ip: context.req.header("CF-Connecting-IP") || "unknown",
+						userAgent: context.req.header("User-Agent")?.substring(0, 100) || "unknown",
+						origin: context.req.header("Origin") || "unknown",
+						referer: context.req.header("Referer") || "unknown",
+						path: context.req.path,
+						method: context.req.method
+					});
+
+					throw new Error('CSRF_TOKEN_MISMATCH');
+				}
+			}
+
+			// Ensure token exists and is available to frontend
+			const csrfToken = this.ensureSessionToken();
 			App.addToCurrentState("csrfToken", csrfToken);
 
 			await next();
-			return;
-		}
-
-		// For state-changing requests (POST, PUT, DELETE, PATCH)
-		const isStateChanging = ["POST", "PUT", "DELETE", "PATCH"].includes(context.req.method);
-
-		if (isStateChanging) {
-			// 1. Origin/Referer validation (primary CSRF defense)
-			if (!this.validateOrigin(context)) {
-				return context.json({ 
-					message: "CSRF token mismatch.",
-					errors: {}
-				}, 422); // Unprocessable Entity for CSRF failures
-			}
-
-			// 2. Token validation (double-submit cookie pattern)
-			const sessionToken = Session.get('_token');
-			const requestToken = this.getTokenFromRequest(context);
-
-			if (!sessionToken) {
+		}).catch((error) => {
+			// Handle CSRF errors after CORS is applied
+			if (error.message?.startsWith('CSRF_')) {
 				return context.json({ 
 					message: "CSRF token mismatch.",
 					errors: {}
 				}, 422);
 			}
-
-			if (!requestToken) {
-				return context.json({ 
-					message: "CSRF token mismatch.",
-					errors: {}
-				}, 422);
-			}
-
-			// Timing-safe comparison (prevent timing attacks)
-			if (!this.timingSafeEquals(sessionToken, requestToken)) {
-				// Log potential attack
-				console.warn('CSRF token mismatch:', {
-					ip: context.req.header("CF-Connecting-IP") || "unknown",
-					userAgent: context.req.header("User-Agent")?.substring(0, 100) || "unknown",
-					origin: context.req.header("Origin") || "unknown",
-					referer: context.req.header("Referer") || "unknown",
-					path: context.req.path,
-					method: context.req.method
-				});
-
-				return context.json({ 
-					message: "CSRF token mismatch.",
-					errors: {}
-				}, 422);
-			}
-		}
-
-		// Ensure token exists and is available to frontend
-		const csrfToken = this.ensureSessionToken();
-		App.addToCurrentState("csrfToken", csrfToken);
-
-		await next();
+			throw error; // Re-throw non-CSRF errors
+		});
 	}
 }
