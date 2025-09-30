@@ -44,8 +44,9 @@ interface CorsConfig {
 
 interface CsrfTokenConfig {
 	origin: "same" | string | string[]; // array or string
-	except: string[];
+	avoidPath: string[];
 	allowedOrigins?: string[]; // explicit allowed origins
+	allowedHeaders?: string[]; // allowed headers for CSRF requests (similar to Laravel)
 	validateUserAgent?: boolean; // whether to check for suspicious user agents
 	rateLimit?: {
 		enabled: boolean;
