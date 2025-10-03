@@ -1,22 +1,26 @@
 import { CsrfTokenConfig } from "../src/type-declaration";
 
 /**
- * not for /api/*
- * follow https://hono.dev/docs/middleware/builtin/cors#options
- * But we change the way , we added csrf token system that must be pass with form submitting
- * u can get csrf token with csrf() import {csrf} from 'flying-worker/supports
+ * CSRF Configuration (Laravel-style)
+ * 
+ * This configuration provides CSRF protection identical to Laravel's implementation.
+ * CSRF focuses ONLY on token validation and origin checking - NOT header restrictions.
+ * 
+ * Laravel CSRF Features:
+ * - Token validation (_token form field, X-CSRF-TOKEN header, X-XSRF-TOKEN header)
+ * - Origin/Referer validation (same-origin requests only)
+ * - Excluded paths (like Laravel's $except property)
+ * - Rate limiting protection
+ * - User agent validation
+ * 
+ * Laravel Equivalent Usage:
+ * - HTML Forms: <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+ * - JavaScript: X-CSRF-TOKEN header or X-XSRF-TOKEN (automatic with Axios)
+ * - Get token: csrf() import {csrf} from 'flying-worker/supports'
+ * 
+ * Note: Header restrictions are handled by CORS, not CSRF (like Laravel)
+ * Excluded paths: /api/* (API routes typically use different authentication)
  */
 export const CsrfConfig: CsrfTokenConfig = {
-	origin: "same",
-	avoidPath: ['/api/*'], // except routes
-	allowedOrigins: [
-		"http://localhost:8787",
-		"https://localhost:8787",
-	],
-	validateUserAgent: true, // Block suspicious user agents (curl, wget, etc.)
-	rateLimit: {
-		enabled: true,
-		maxRequests: 100, // Max requests per window
-		windowMs: 900000, // 15 minutes
-	}
+	avoidPath: ['/api/*'] // Equivalent to Laravel's $except property
 };

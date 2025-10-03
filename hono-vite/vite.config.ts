@@ -1,12 +1,6 @@
 import { cloudflare } from '@cloudflare/vite-plugin'
 import { defineConfig } from 'vite'
-// import ssrPlugin from 'vite-ssr-components/plugin'
-
-
-//
-//    "vite-ssr-components": "^0.3.0",
-
-
+ 
 
 export default defineConfig({
   server: {
@@ -14,6 +8,5 @@ export default defineConfig({
   },
   plugins: [
       cloudflare(),
-    // ssrPlugin()
   ]
 })

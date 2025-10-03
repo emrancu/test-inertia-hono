@@ -43,16 +43,7 @@ interface CorsConfig {
 }
 
 interface CsrfTokenConfig {
-	origin: "same" | string | string[]; // array or string
-	avoidPath: string[];
-	allowedOrigins?: string[]; // explicit allowed origins
-	allowedHeaders?: string[]; // allowed headers for CSRF requests (similar to Laravel)
-	validateUserAgent?: boolean; // whether to check for suspicious user agents
-	rateLimit?: {
-		enabled: boolean;
-		maxRequests: number;
-		windowMs: number;
-	};
+	avoidPath: string[]; // Laravel's $except equivalent
 }
 
 type CallbackListener = (...args: any[]) => Promise<void> | void;
@@ -169,7 +160,7 @@ export type SocialAuth = {
 type Config = {
 	app: AppConfig;
 	session: SessionConfig;
-	// auth: AuthConfig;
+	auth: AuthConfig;
 	// database: DatabaseConfig;
 	cors: CorsConfig;
 	csrf: CsrfTokenConfig;

@@ -1,4 +1,4 @@
-import { deleteCookie, getSignedCookie, setSignedCookie } from "hono/cookie";
+import { deleteCookie, getCookie, getSignedCookie, setCookie, setSignedCookie } from "hono/cookie";
 import { AppRequest } from "../core";
 import { App } from "../core";
 
@@ -24,32 +24,61 @@ export function parseLifetime(duration: string) {
 }
 
 export const Cookie = {
-	set: (name: string, value: string, maxAge: string | number | null = null) => {
+	/**
+	 * Set a signed cookie (secure, server-side only)
+	 */
+	set: async (name: string, value: string, maxAge: string | number | null = null) => {
 		const maxAgeValue = maxAge ?? App.config.session.lifetime;
 
-		let expiresInSeconds =
+		const expiresInSeconds =
 			typeof maxAgeValue === "string"
 				? parseLifetime(maxAgeValue)
 				: maxAgeValue;
 
-		setSignedCookie(AppRequest.getContext(), name, value, App.config.app.secret, {
+		await setSignedCookie(AppRequest.getContext(), name, value, App.config.app.secret, {
 			path: App.config.session.path,
 			secure: App.config.session.secure,
 			httpOnly: App.config.session.httpOnly,
 			maxAge: expiresInSeconds,
 			sameSite: App.config.session.sameSite,
-		}).then();
+		});
 	},
 
+	/**
+	 * Set an unsigned cookie (readable by JavaScript)
+	 * Used for CSRF tokens that need client-side access
+	 */
+	setUnsigned: (name: string, value: string, options: { httpOnly?: boolean; secure?: boolean; sameSite?: string } = {}) => {
+		setCookie(AppRequest.getContext(), name, value, {
+			path: "/",
+			secure: options.secure ?? App.config.session.secure,
+			httpOnly: options.httpOnly ?? false, // Default false for JS access
+			sameSite: (options.sameSite ?? "Lax") as "Strict" | "Lax" | "None",
+			maxAge: 60 * 60 * 24, // 24 hours for CSRF tokens
+		});
+	},
+
+	/**
+	 * Get a signed cookie
+	 */
 	get: async (name: string) => {
-		const data = await getSignedCookie(
+		return await getSignedCookie(
 			AppRequest.getContext(),
 			App.config.app.secret,
 			name,
 		);
-		return data;
 	},
 
+	/**
+	 * Get an unsigned cookie
+	 */
+	getUnsigned: (name: string) => {
+		return getCookie(AppRequest.getContext(), name);
+	},
+
+	/**
+	 * Delete a cookie
+	 */
 	delete: (name: string) => {
 		deleteCookie(AppRequest.getContext(), name);
 	},

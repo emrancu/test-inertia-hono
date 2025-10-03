@@ -25,17 +25,10 @@ class JwtAuth extends BaseMiddleware {
 	}
 
 	public async boot(context: Context, next: Next) {
+		
 		const currentGuard = this.guard ?? "api";
 
-		// return context.json({
-		// 	currentGuard: currentGuard
-		// })
-
 		const jwtConfig = App.config.auth.guards[currentGuard] as JwtGuardConfig;
-
-		if (!jwtConfig?.useCookie) {
-			throw new HTTPException(500, { message: "Invalid jwt guard" });
-		}
 
 		let options: jwtMiddlewareOptions = { secret: App.config.app.secret };
 

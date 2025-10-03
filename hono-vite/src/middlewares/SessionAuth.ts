@@ -1,6 +1,6 @@
 import type { Context, Next } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { SessionAuth as Auth } from "../auth";
+import { WebAuth } from "../auth";
 import { App } from "../core";
 import BaseMiddleware from "../core/abstraction/BaseMiddleware";
 import { SessionGuardConfig } from "../type-declaration/config";
@@ -17,16 +17,17 @@ class SessionAuth extends BaseMiddleware {
 	}
 
 	public async boot(context: Context, next: Next) {
-		const currentGuard = this.guard ?? App.config.auth.defaultGuard;
+		const currentGuard = this.guard ?? App.config.auth.defaultWebGuard;
 
-		const jwtConfig = App.config.auth.guards[
+		const guardConfig = App.config.auth.guards[
 			currentGuard
 		] as SessionGuardConfig;
-		if (jwtConfig.driver !== "session") {
+
+		if (guardConfig.driver !== "session") {
 			throw new HTTPException(500, { message: "Invalid session guard" });
 		}
 
-		if (!Auth.check(currentGuard)) {
+		if (!WebAuth.check(currentGuard)) {
 			return context.redirect(this.redirectPath, 302);
 		}
 

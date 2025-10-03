@@ -35,20 +35,15 @@ App.hono.get("test-001", async (context: Context) => {
 
 
 
-// Route.get("/web", async (context: Context) => {
-//
-// 	return context.json({
-// 		auth: await ApiAuth.createToken({
-// 			name: 'AL EMRAN',
-// 			user: {
-// 				id: 1,
-// 				name: 'Emran',
-// 				email: "emrancu1@gmail.com"
-// 			},
-// 		})
-// 	});
-// 	// return SocialAuth.github().redirect();
-// });
+ Route.get("/product", async (context: Context) => {
+
+	return context.json({
+		data: "Hello",
+	});
+	 
+});
+
+
 //
 // Route.get("/web/callback", async (context: Context) => {
 // 	return context.json({
