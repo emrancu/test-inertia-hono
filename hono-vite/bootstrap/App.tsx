@@ -27,7 +27,11 @@ export default {
 			await initApp();
 		}
 
-		return HonoApp?.fetch(request, env, ctx);
+		if (!HonoApp) {
+			return new Response("Application failed to initialize", { status: 500 });
+		}
+
+		return HonoApp.fetch(request, env, ctx);
 	},
 	bootQueue: async (env: Env, ctx: ExecutionContext) => {
 		if (!HonoApp) {

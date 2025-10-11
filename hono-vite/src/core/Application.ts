@@ -25,8 +25,6 @@ class Application {
 		[key: string]: unknown;
 	} = {};
 
-	public apiPrefix = "api";
-
 	constructor() {
 	}
 
@@ -118,39 +116,7 @@ class Application {
 				finalPath = finalPath.replace(/\/+/g, "/").replace(/\/$/, "");
 			}
 
-			// Attach middlewares
-			// for (let alias of middlewares) {
-			// 	let guard: string | null = null;
-			// 	if (/sessionAuth|jwtAuth/.test(alias)) {
-			// 		let parts = alias.split(":");
-			// 		alias = parts[0];
-			// 		guard = parts[1] ?? null;
-			// 	}
-			//
-			// 	const middleware = this.config.middlewares.aliases[alias];
-			//
-			// 	if (!middlewareInstances.has(middleware)) {
-			// 		middlewareInstances.set(middleware, new middleware());
-			// 	}
-			//
-			// 	const middlewareInstance = middlewareInstances.get(middleware);
-			// 	if (middlewareInstance) {
-			// 		if (
-			// 			guard &&
-			// 			(middlewareInstance instanceof JwtAuth ||
-			// 				middlewareInstance instanceof SessionAuth)
-			// 		) {
-			// 			middlewareInstance.setGuard(guard);
-			// 		}
-			//
-			// 		this.hono.use(
-			// 			finalPath,
-			// 			middlewareInstance.boot.bind(middlewareInstance),
-			// 		);
-			// 	}
-			// }
 			// @ts-ignore
-
 			this.hono[method](finalPath, handler);
 		}
 	}
@@ -166,7 +132,7 @@ class Application {
 
 		await this.config.app.apiRoute();
 
-		this.applyRoutes(this.apiPrefix);
+		this.applyRoutes(this.config.app.apiPrefix);
 	}
 
 	private activePoweredByMiddleware() {

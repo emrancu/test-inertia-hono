@@ -9,7 +9,7 @@ export default {
 		return await Application.boot(request, env, ctx); 
 	},
 
-	async queue(batch: any , env: any, ctx: any) {
+	async queue(_batch: any, _env: any, _ctx: any) {
 		 
 	},
 };

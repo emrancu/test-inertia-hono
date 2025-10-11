@@ -17,6 +17,9 @@ export const appConfig: AppConfig = {
 		status: false,
 		message: "<h1>We are performing maintenance. Please check back soon.</h1>",
 	},
+
+	apiPrefix: "api",
+
 	apiRoute: async () => {
 		// await import("../routes/api");
 	},
