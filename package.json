@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite & wrangler dev --local --assets dist --port 8787",
     "dev:vite": "vite", 
-    "build": "vite build && node tools/gen-manifest-module.mjs",
+    "build": "vite build",
     "test:prod": "npm run build && wrangler dev --local -e prod",
     "deploy": "npm run build && wrangler deploy"
   },

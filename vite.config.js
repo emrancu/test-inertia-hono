@@ -1,9 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'node:path'
+import flyingWorker from './src/vite-plugin/flying-worker.js'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    flyingWorker()
+  ],
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
