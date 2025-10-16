@@ -10,8 +10,8 @@ import { App } from "../src/core";
 import { Route } from "../src/route";
 import { inertiaRender } from "../src/inertia";
 
-App.hono.get('/', c => inertiaRender(c, 'Home', { name: 'World' }))
-App.hono.get('/about', c => inertiaRender(c, 'About', { team: 'Hono + Inertia on Workers' }))
+App.hono.get('/', c => inertiaRender('Home', { name: 'World' }))
+App.hono.get('/about', c => inertiaRender('About', { team: 'Hono + Inertia on Workers' }))
 
 Route.get("/product", async (context: Context) => {
 	return context.json({

@@ -1,6 +1,7 @@
 import { type Context } from 'hono'
 import { viteManifest } from '../../inertia/manifest.data'
 import appHtmlTemplate from '../../resources/views/app.html?raw'
+import { AppRequest } from '../core'
 
 // Detect development mode more reliably
 const DEV = typeof globalThis !== 'undefined' && 
@@ -71,12 +72,13 @@ function isInertia(c: Context): boolean {
   return c.req.header('X-Inertia') === 'true' 
 }
 
-export function inertiaRender(c: Context, component: string, props: Record<string, any> = {}) {
+export function inertiaRender(component: string, props: Record<string, any> = {}) {
+  const c = AppRequest.getContext()
   const shared = c.get('inertia.shared') ?? {}
   const page = {
     component,
     props: { ...shared, ...props },
-    url: new URL(c.req.url).pathname,
+    url: AppRequest.pathname(),
     version: c.get('inertia.version') ?? 'v1'
   }
 

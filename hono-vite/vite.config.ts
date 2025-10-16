@@ -12,25 +12,10 @@ export default defineConfig({
   plugins: [
     react(),
     cloudflare(),
-    flyingWorker()
+    flyingWorker({
+      appPath: 'resources/js',
+      // outDir: 'dist', // optional, defaults to 'dist'
+      // assetsDir: 'assets', // optional, defaults to 'assets'
+    })
   ] as PluginOption[],
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    manifest: true,
-    rollupOptions: {
-      input: 'resources/js/app.jsx',
-      output: {
-        assetFileNames: 'assets/[name]-[hash][extname]',
-        manualChunks(id: string) {
-          if (id.includes('/resources/js/Pages/')) {
-            const segments = id.split('/');
-            const fileName = segments[segments.length - 1];
-            const fileNameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
-            return `Pages_${fileNameWithoutExt}`;
-          }
-        },
-      },
-    },
-  },
 })

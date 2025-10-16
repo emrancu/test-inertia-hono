@@ -6,7 +6,7 @@ export default function Home({ name }) {
   
   return (
     <div style={{ padding: 24 }}>
-      <h1>Home Page   {name}</h1>
+      <h1>Home Page 1   {name}</h1>
       <button onClick={() => setCount(c => c + 1)}>
         Count is sdsd: {count}
       </button>
