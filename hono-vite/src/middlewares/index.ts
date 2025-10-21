@@ -1,6 +1,6 @@
 import Cors from "./Cors";
 import CsrfToken from "./CsrfToken";
-// import JwtAuth from "./JwtAuth";
+import JwtAuth from "./JwtAuth";
 import MaintenanceMode from "./MaintenanceMode";
 // import ReactRouter from "./ReactRouter";
 // import ReactRouterMiddlewareApply from "./ReactRouterMiddlewareApply";
@@ -9,7 +9,7 @@ import Session from "./Session";
 
 export {
 	// ReactRouter,
-	// JwtAuth,
+	JwtAuth,
 	// SessionAuth,
 	// ReactRouterMiddlewareApply,
 	Cors,

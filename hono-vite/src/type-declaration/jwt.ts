@@ -13,3 +13,15 @@ export type JWTPayload = {
 	 */
 	iat?: number;
 };
+
+
+
+export type JwtMiddlewareOptions = {
+	secret: string;
+	cookie?:
+		| string
+		| {
+				key: string;
+				secret?: string;
+		  };
+};

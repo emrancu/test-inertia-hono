@@ -14,7 +14,7 @@ import {
 	SessionConfig,
 	SocialAuth,
 } from "./config";
-import { JWTPayload } from "./jwt";
+import { JWTPayload, JwtMiddlewareOptions } from "./jwt";
 import { MiddlewareClass, MiddlewareInstance } from "./middleware";
 import {
 	ApiTokenPayload,
@@ -58,5 +58,6 @@ export {
 	Events,
 	QueueConfig,
 	JWTPayload,
+	JwtMiddlewareOptions,
 	SocialAuth,
 };

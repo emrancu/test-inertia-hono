@@ -3,36 +3,74 @@ import { HTTPException } from "hono/http-exception";
 import { jwt } from "hono/jwt";
 import { App } from "../core";
 import BaseMiddleware from "../core/abstraction/BaseMiddleware";
-import { JwtGuardConfig } from "../type-declaration";
+import { JwtGuardConfig, JwtMiddlewareOptions } from "../type-declaration";
 
-type jwtMiddlewareOptions = {
-	secret: string;
-	cookie?:
-		| string
-		| {
-				key: string;
-				secret?: string;
-		  };
-};
 
 class JwtAuth extends BaseMiddleware {
-	private guard: string | null = null;
+	private guardsName: string | null = null;
 
+	/**
+	 * Set the guard to use for authentication
+	 */
 	public setGuard(guard?: string) {
 		if (guard) {
-			this.guard = guard;
+			this.guardsName = guard;
+		}
+		return this;
+	}
+
+	/**
+	 * Get current guard name or default
+	 */
+	private getCurrentGuard(context: Context): string {
+		if (this.guardsName) {
+			return this.guardsName;
+		}
+		
+		// Try to detect if this is an API request or Web request
+		try {
+			const path = context.req.path || "";
+			const isApiRequest = path.startsWith("/api");
+			
+			return isApiRequest 
+				? App.config.auth.defaultApiGuard 
+				: App.config.auth.defaultWebGuard;
+		} catch (error) {
+			return App.config.auth.defaultApiGuard;
 		}
 	}
 
-	public async boot(context: Context, next: Next) {
+	/**
+	 * Get guard configuration
+	 */
+	private getGuardConfig(guardName: string): JwtGuardConfig {
+		const guardConfig = App.config.auth.guards[guardName];
 		
-		const currentGuard = this.guard ?? "api";
+		if (!guardConfig) {
+			throw new HTTPException(500, { 
+				message: `Guard "${guardName}" not found in configuration` 
+			});
+		}
 
-		const jwtConfig = App.config.auth.guards[currentGuard] as JwtGuardConfig;
+		if (guardConfig.driver !== "jwt") {
+			throw new HTTPException(500, { 
+				message: `Guard "${guardName}" is not a JWT guard` 
+			});
+		}
+		
+		return guardConfig as JwtGuardConfig;
+	}
 
-		let options: jwtMiddlewareOptions = { secret: App.config.app.secret };
+	public async boot(context: Context, next: Next) {
+		const currentGuard = this.getCurrentGuard(context);
+		const jwtConfig = this.getGuardConfig(currentGuard);
 
-		if (jwtConfig.useCookie.status) {
+		let options: JwtMiddlewareOptions = { 
+			secret: App.config.app.secret 
+		};
+
+		// Configure cookie-based JWT if enabled (optional)
+		if (jwtConfig.useCookie?.status) {
 			options.cookie = {
 				key: jwtConfig.useCookie.key,
 				secret: App.config.app.secret,
