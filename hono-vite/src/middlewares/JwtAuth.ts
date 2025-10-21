@@ -7,17 +7,7 @@ import { JwtGuardConfig, JwtMiddlewareOptions } from "../type-declaration";
 
 
 class JwtAuth extends BaseMiddleware {
-	private guardsName: string | null = null;
-
-	/**
-	 * Set the guard to use for authentication
-	 */
-	public setGuard(guard?: string) {
-		if (guard) {
-			this.guardsName = guard;
-		}
-		return this;
-	}
+	protected guardsName: string | null = null;
 
 	/**
 	 * Get current guard name or default
