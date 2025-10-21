@@ -1,10 +1,11 @@
 import { HTTPException } from "hono/http-exception";
-import { App, Request } from "../../core";
+import { App, AppRequest } from "../../core";
 import { Session } from "../../session";
 import { Str } from "../../supports";
 import { SocialAuthUser } from "../../type-declaration";
+import { BaseSocialAuth } from "./BaseSocialAuth";
 
-export class Google {
+export class Google extends BaseSocialAuth {
 	private getState() {
 		return Str.uuid();
 	}
@@ -14,14 +15,14 @@ export class Google {
 			? App.config.socialAuth.google
 			: null;
 		if (!config) {
-			throw new HTTPException(401);
+			throw new HTTPException(401, { message: "Google OAuth not configured" });
 		}
 
 		const newState = this.getState();
 
 		const parsedOptions = Str.toQueryParams({
 			response_type: "code",
-			redirect_uri: Request.getBaseUrl(config.redirectPath),
+			redirect_uri: AppRequest.getBaseUrl() + config.redirectPath,
 			client_id: config.clientId,
 			include_granted_scopes: true,
 			scope: ["openid", "email", "profile"].join(" "),
@@ -30,7 +31,7 @@ export class Google {
 
 		Session.set("state", newState);
 
-		return Request.getContext().redirect(
+		return AppRequest.getContext().redirect(
 			`https://accounts.google.com/o/oauth2/v2/auth?${parsedOptions}`,
 		);
 	}
@@ -40,15 +41,15 @@ export class Google {
 			? App.config.socialAuth.google
 			: null;
 		if (!config) {
-			throw new HTTPException(401);
+			throw new HTTPException(401, { message: "Google OAuth not configured" });
 		}
 
-		if (!Request.input("code")) {
+		if (!AppRequest.input("code")) {
 			throw new Error("Code not found");
 		}
 
-		if (Request.input("state") !== Session.get("state")) {
-			throw new HTTPException(401);
+		if (AppRequest.input("state") !== Session.get("state")) {
+			throw new HTTPException(401, { message: "Invalid state parameter" });
 		}
 
 		const response = await fetch("https://oauth2.googleapis.com/token", {
@@ -58,10 +59,10 @@ export class Google {
 				accept: "application/json",
 			},
 			body: JSON.stringify({
-				clientId: config.clientId,
-				clientSecret: config.clientSecret,
-				redirect_uri: Request.getBaseUrl(config.redirectPath),
-				code: Request.input("code"),
+				client_id: config.clientId,
+				client_secret: config.clientSecret,
+				redirect_uri: AppRequest.getBaseUrl() + config.redirectPath,
+				code: AppRequest.input("code"),
 				grant_type: "authorization_code",
 			}),
 		}).then((res) => res.json());

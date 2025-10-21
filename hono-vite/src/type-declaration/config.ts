@@ -173,7 +173,7 @@ type Config = {
 export {
 	MiddlewareAliasType,
 	AppConfig,
-	SessionConfig,
+	SessionConfig,  
 	AuthConfig,
 	Config,
 	DatabaseConfig,

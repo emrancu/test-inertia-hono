@@ -1,16 +1,11 @@
 import { HTTPException } from "hono/http-exception";
-import { App, Request } from "../../core";
+import { App, AppRequest } from "../../core";
 import { Session } from "../../session";
 import { Str } from "../../supports";
+import { SocialAuthUser } from "../../type-declaration";
+import { BaseSocialAuth } from "./BaseSocialAuth";
 
-type User = {
-	name: string;
-	id: string;
-	username: string;
-	avatar: string;
-};
-
-export class Twitter {
+export class Twitter extends BaseSocialAuth {
 	private getState() {
 		return Str.uuid();
 	}
@@ -42,7 +37,7 @@ export class Twitter {
 	public async redirect() {
 		const config = App.config.socialAuth?.x ? App.config.socialAuth.x : null;
 		if (!config) {
-			throw new HTTPException(401);
+			throw new HTTPException(401, { message: "X/Twitter OAuth not configured" });
 		}
 
 		const newState = this.getState();
@@ -50,7 +45,7 @@ export class Twitter {
 
 		const parsedOptions = Str.toQueryParams({
 			response_type: "code",
-			redirect_uri: Request.getBaseUrl(config.redirectPath),
+			redirect_uri: AppRequest.getBaseUrl() + config.redirectPath,
 			client_id: config.clientId,
 			scope: config.scopes.join(" "),
 			state: newState,
@@ -61,7 +56,7 @@ export class Twitter {
 		Session.set("state", newState);
 		Session.set("x-codeVerifier", challenge.codeVerifier);
 
-		return Request.getContext().redirect(
+		return AppRequest.getContext().redirect(
 			`https://x.com/i/oauth2/authorize?${parsedOptions}`,
 		);
 	}
@@ -69,23 +64,23 @@ export class Twitter {
 	private async getTokenFromCode() {
 		const config = App.config.socialAuth?.x ? App.config.socialAuth.x : null;
 		if (!config) {
-			throw new HTTPException(401);
+			throw new HTTPException(401, { message: "X/Twitter OAuth not configured" });
 		}
 
-		if (!Request.input("code")) {
+		if (!AppRequest.input("code")) {
 			throw new Error("Code not found");
 		}
 
-		if (Request.input("state") !== Session.get("state")) {
-			throw new HTTPException(401);
+		if (AppRequest.input("state") !== Session.get("state")) {
+			throw new HTTPException(401, { message: "Invalid state parameter" });
 		}
 
 		const challenge = await this.getCodeChallenge();
 		const parsedOptions = Str.toQueryParams({
-			code: Request.input("code"),
+			code: AppRequest.input("code"),
 			grant_type: "authorization_code",
 			client_id: config.clientId,
-			redirect_uri: Request.getBaseUrl(config.redirectPath),
+			redirect_uri: AppRequest.getBaseUrl() + config.redirectPath,
 			code_verifier: Session.get("x-codeVerifier"),
 		});
 
@@ -111,7 +106,7 @@ export class Twitter {
 		}
 	}
 
-	async getUser(): Promise<User | null> {
+	async getUser(): Promise<SocialAuthUser | null> {
 		const token = await this.getTokenFromCode();
 
 		const parsedOptions = Str.toQueryParams({

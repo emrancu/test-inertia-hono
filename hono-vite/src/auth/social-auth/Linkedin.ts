@@ -1,13 +1,11 @@
-import {
-	HTTPException,
-	HTTPException as HTTPException2,
-} from "hono/http-exception";
-import { App, Request } from "../../core";
+import { HTTPException } from "hono/http-exception";
+import { App, AppRequest } from "../../core";
 import { Session } from "../../session";
 import { Str } from "../../supports";
 import { SocialAuthUser } from "../../type-declaration";
+import { BaseSocialAuth } from "./BaseSocialAuth";
 
-export class Linkedin {
+export class Linkedin extends BaseSocialAuth {
 	private getState() {
 		return Str.uuid();
 	}
@@ -17,14 +15,14 @@ export class Linkedin {
 			? App.config.socialAuth.linkedin
 			: null;
 		if (!config) {
-			throw new HTTPException2(401);
+			throw new HTTPException(401, { message: "LinkedIn OAuth not configured" });
 		}
 
 		const newState = this.getState();
 
 		const parsedOptions = Str.toQueryParams({
 			response_type: "code",
-			redirect_uri: Request.getBaseUrl(config.redirectPath),
+			redirect_uri: AppRequest.getBaseUrl() + config.redirectPath,
 			client_id: config.clientId,
 			scope: config.scopes.join(" "),
 			state: newState,
@@ -32,7 +30,7 @@ export class Linkedin {
 
 		Session.set("state", newState);
 
-		return Request.getContext().redirect(
+		return AppRequest.getContext().redirect(
 			`https://www.linkedin.com/oauth/v2/authorization?${parsedOptions}`,
 		);
 	}
@@ -42,23 +40,23 @@ export class Linkedin {
 			? App.config.socialAuth.linkedin
 			: null;
 		if (!config) {
-			throw new HTTPException2(401);
+			throw new HTTPException(401, { message: "LinkedIn OAuth not configured" });
 		}
 
-		if (!Request.input("code")) {
+		if (!AppRequest.input("code")) {
 			throw new Error("Code not found");
 		}
 
-		if (Request.input("state") !== Session.get("state")) {
-			throw new HTTPException2(401);
+		if (AppRequest.input("state") !== Session.get("state")) {
+			throw new HTTPException(401, { message: "Invalid state parameter" });
 		}
 
 		const params = Str.toQueryParams({
 			grant_type: "authorization_code",
-			code: Request.input("code"),
+			code: AppRequest.input("code"),
 			client_id: config.clientId,
 			client_secret: config.clientSecret,
-			redirect_uri: Request.getBaseUrl(config.redirectPath),
+			redirect_uri: AppRequest.getBaseUrl() + config.redirectPath,
 		});
 
 		const response = await fetch(

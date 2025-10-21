@@ -1,12 +1,13 @@
 import { HTTPException } from "hono/http-exception";
-import { App, Request } from "../../core";
+import { App, AppRequest } from "../../core";
 import { Session } from "../../session";
 import { Str } from "../../supports";
 import { SocialAuthUser } from "../../type-declaration";
+import { BaseSocialAuth } from "./BaseSocialAuth";
 
 const userAgent: string = "FlyingWorker-Auth-App";
 
-export class Github {
+export class Github extends BaseSocialAuth {
 	private getState() {
 		return Str.uuid();
 	}
@@ -16,7 +17,7 @@ export class Github {
 			? App.config.socialAuth.github
 			: null;
 		if (!config) {
-			throw new HTTPException(401);
+			throw new HTTPException(401, { message: "Github OAuth not configured" });
 		}
 
 		const newState = this.getState();
@@ -31,7 +32,7 @@ export class Github {
 			client_id: config.clientId,
 			state: newState,
 			oauthApp: false,
-			redirect_uri: Request.getBaseUrl(config.redirectPath),
+			redirect_uri: AppRequest.getBaseUrl() + config.redirectPath,
 		};
 
 		// For GitHub apps, the scope is configured during the app setup / creation.
@@ -48,7 +49,7 @@ export class Github {
 
 		Session.set("state", newState);
 
-		return Request.getContext().redirect(
+		return AppRequest.getContext().redirect(
 			`https://github.com/login/oauth/authorize?${queryParams}`,
 		);
 	}
@@ -58,15 +59,15 @@ export class Github {
 			? App.config.socialAuth.github
 			: null;
 		if (!config) {
-			throw new HTTPException(401);
+			throw new HTTPException(401, { message: "Github OAuth not configured" });
 		}
 
-		if (!Request.input("code")) {
+		if (!AppRequest.input("code")) {
 			throw new Error("Code not found");
 		}
 
-		if (Request.input("state") !== Session.get("state")) {
-			throw new HTTPException(401);
+		if (AppRequest.input("state") !== Session.get("state")) {
+			throw new HTTPException(401, { message: "Invalid state parameter" });
 		}
 
 		const response = await fetch(
@@ -76,7 +77,7 @@ export class Github {
 				body: JSON.stringify({
 					client_id: config.clientId,
 					client_secret: config.clientSecret,
-					code: Request.input("code"),
+					code: AppRequest.input("code"),
 				}),
 				headers: {
 					Accept: "application/json",
@@ -105,14 +106,15 @@ export class Github {
 		}).then((res) => res.json());
 
 		if ("message" in response) {
-			throw new HTTPException(400, { message: `${response.message}okokok` });
+			throw new HTTPException(400, { message: response.message });
 		}
 
 		if ("id" in response) {
 			return {
-				id: response.id,
+				id: response.id.toString(),
 				email: response.email,
-				name: response.name,
+				name: response.name || response.login,
+				username: response.login,
 				avatar: response.avatar_url,
 			};
 		}

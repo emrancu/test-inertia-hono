@@ -1,25 +1,71 @@
 import {JwtAuthManager, resolveJwtAuth} from "./ApiAuth";
-import {AuthManager, resolveSessionAuth} from "./Auth";
+import {AuthManager, resolveAuth, resolveSessionAuth} from "./Auth";
 import {SocialAuth} from "./SocialAuth";
 
-const WebAuth = {
+/**
+ * Unified Auth system that works with all guards (session and JWT)
+ * Automatically detects and uses the appropriate driver based on guard configuration
+ * 
+ * Usage:
+ * - Auth.guard('web').login(user) // Session-based login
+ * - Auth.guard('api').login(user, { permissions: ['read', 'write'] }) // JWT-based login
+ * - Auth.guard('web').user() // Get user from session
+ * - Auth.guard('api').user() // Get user from JWT
+ * - Auth.attempt(credentials) // Auto-detects guard based on route
+ */
+const Auth = {
     guard: (...args: Parameters<AuthManager['guard']>)=> {
-            return resolveSessionAuth().guard(...args);
+        return resolveAuth().guard(...args);
     },
-    logout: () => {
-        return resolveSessionAuth().logout();
+    logout: (...args: Parameters<AuthManager['logout']>)=> {
+        return resolveAuth().logout(...args);
     },
     login:  (...args: Parameters<AuthManager['login']>)=> {
-        return resolveSessionAuth().login(...args);
+        return resolveAuth().login(...args);
+    },
+    attempt: (...args: Parameters<AuthManager['attempt']>)=> {
+        return resolveAuth().attempt(...args);
     },
     user:  ()=> {
-        return resolveSessionAuth().user();
+        return resolveAuth().user();
     },
     check: (...args: Parameters<AuthManager['check']>)=> {
-        return resolveSessionAuth().check(...args);
+        return resolveAuth().check(...args);
     }
 };
 
+/**
+ * WebAuth - Backward compatible, session-based authentication
+ * Recommended to use Auth.guard('web') instead for better flexibility
+ */
+const WebAuth = {
+    guard: (...args: Parameters<AuthManager['guard']>)=> {
+        return resolveAuth().guard(...args);
+    },
+    logout: (...args: Parameters<AuthManager['logout']>)=> {
+        return resolveAuth().logout();
+    },
+    login:  (...args: Parameters<AuthManager['login']>)=> {
+        return resolveAuth().login(...args);
+    },
+    attempt: (...args: Parameters<AuthManager['attempt']>)=> {
+        return resolveAuth().attempt(...args);
+    },
+    user:  ()=> {
+        return resolveAuth().user();
+    },
+    check: (...args: Parameters<AuthManager['check']>)=> {
+        return resolveAuth().check(...args);
+    }
+};
+
+/**
+ * ApiAuth - Backward compatible, JWT-based authentication
+ * Recommended to use Auth.guard('api') instead for better flexibility
+ * 
+ * Note: createToken method is still available for backward compatibility,
+ * but Auth.guard('api').login() is recommended for new code
+ */
 const ApiAuth = {
     createToken: (...args: Parameters<JwtAuthManager['createToken']>)=> {
         return resolveJwtAuth().createToken(...args);
@@ -36,4 +82,4 @@ const ApiAuth = {
 };
 
 
-export { ApiAuth, WebAuth, SocialAuth };
+export { Auth, ApiAuth, WebAuth, SocialAuth };
