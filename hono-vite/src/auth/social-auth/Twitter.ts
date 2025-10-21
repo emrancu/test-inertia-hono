@@ -53,8 +53,8 @@ export class Twitter extends BaseSocialAuth {
 			code_challenge_method: "S256",
 		});
 
-		Session.set("state", newState);
-		Session.set("x-codeVerifier", challenge.codeVerifier);
+		Session.put("state", newState);
+		Session.put("x-codeVerifier", challenge.codeVerifier);
 
 		return AppRequest.getContext().redirect(
 			`https://x.com/i/oauth2/authorize?${parsedOptions}`,
@@ -98,6 +98,10 @@ export class Twitter extends BaseSocialAuth {
 				},
 			},
 		).then((res) => res.json());
+
+		Session.forget("state");
+		Session.forget("x-codeVerifier");
+
 		if ("error" in response) {
 			throw new HTTPException(400, { message: response.error_description });
 		}

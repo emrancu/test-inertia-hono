@@ -13,6 +13,10 @@ import {
 	QueueConfig,
 	SessionConfig,
 	SocialAuth,
+	GoogleOAuth,
+	LinkedInOAuth,
+	XOAuth,
+	Github,
 } from "./config";
 import { JWTPayload, JwtMiddlewareOptions } from "./jwt";
 import { MiddlewareClass, MiddlewareInstance } from "./middleware";
@@ -60,4 +64,8 @@ export {
 	JWTPayload,
 	JwtMiddlewareOptions,
 	SocialAuth,
+	GoogleOAuth,
+	LinkedInOAuth,
+	XOAuth,
+	Github,
 };

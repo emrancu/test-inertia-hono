@@ -29,7 +29,7 @@ export class Google extends BaseSocialAuth {
 			state: newState,
 		});
 
-		Session.set("state", newState);
+		Session.put("state", newState);
 
 		return AppRequest.getContext().redirect(
 			`https://accounts.google.com/o/oauth2/v2/auth?${parsedOptions}`,

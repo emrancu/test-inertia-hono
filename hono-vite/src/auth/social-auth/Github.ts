@@ -47,7 +47,7 @@ export class Github extends BaseSocialAuth {
 
 		const queryParams = Str.toQueryParams(options);
 
-		Session.set("state", newState);
+		Session.put("state", newState);
 
 		return AppRequest.getContext().redirect(
 			`https://github.com/login/oauth/authorize?${queryParams}`,
@@ -85,6 +85,9 @@ export class Github extends BaseSocialAuth {
 				},
 			},
 		).then((res) => res.json());
+
+		Session.forget("state");
+
 		if ("error_description" in response) {
 			throw new HTTPException(400, { message: response.error_description });
 		}

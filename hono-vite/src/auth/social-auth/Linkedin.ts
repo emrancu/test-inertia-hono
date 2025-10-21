@@ -28,7 +28,7 @@ export class Linkedin extends BaseSocialAuth {
 			state: newState,
 		});
 
-		Session.set("state", newState);
+		Session.put("state", newState);
 
 		return AppRequest.getContext().redirect(
 			`https://www.linkedin.com/oauth/v2/authorization?${parsedOptions}`,
@@ -68,6 +68,9 @@ export class Linkedin extends BaseSocialAuth {
 				},
 			},
 		).then((res) => res.json());
+
+		Session.forget("state");
+
 		if ("error" in response) {
 			throw new HTTPException(400, { message: response.error_description });
 		}

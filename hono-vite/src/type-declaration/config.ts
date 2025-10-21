@@ -122,27 +122,27 @@ type SessionConfig = {
 	sameSite:  "lax" | "strict" | "none";
 };
 
-type GoogleOAuth = {
+export type GoogleOAuth = {
 	clientId: string;
 	clientSecret: string;
 	redirectPath: string;
 };
 
-type LinkedInOAuth = {
-	clientId: string;
-	clientSecret: string;
-	redirectPath: string;
-	scopes: string[];
-};
-
-type XOAuth = {
+export type LinkedInOAuth = {
 	clientId: string;
 	clientSecret: string;
 	redirectPath: string;
 	scopes: string[];
 };
 
-type Github = {
+export type XOAuth = {
+	clientId: string;
+	clientSecret: string;
+	redirectPath: string;
+	scopes: string[];
+};
+
+export type Github = {
 	clientId: string;
 	clientSecret: string;
 	redirectPath: string;
@@ -167,7 +167,7 @@ type Config = {
 	middlewares: MiddlewaresConfig;
 	// eventListener: Events;
 	// queue: QueueConfig;
-	// socialAuth: SocialAuth;
+	socialAuth?: SocialAuth;
 };
 
 export {
