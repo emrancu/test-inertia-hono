@@ -28,6 +28,13 @@ import {
 	TokenData,
 } from "./model";
 import { DefineRouteFunction, HandlerFunction, HttpMethod } from "./route";
+import {
+	R2Config,
+	UploadOptions,
+	FileInfo,
+	ListOptions,
+	ListResult,
+} from "./storage";
 
 export type SocialAuthUser = {
 	id: string;
@@ -68,4 +75,9 @@ export {
 	LinkedInOAuth,
 	XOAuth,
 	Github,
+	R2Config,
+	UploadOptions,
+	FileInfo,
+	ListOptions,
+	ListResult,
 };

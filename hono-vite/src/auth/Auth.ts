@@ -635,7 +635,4 @@ export const resolveAuth = (): AuthManager => {
 	});
 };
 
-// Backward compatibility
-export const resolveSessionAuth = resolveAuth;
-
  

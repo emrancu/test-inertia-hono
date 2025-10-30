@@ -299,3 +299,9 @@ Route.get("/auth/google/callback", async (c) => {
 - X (Twitter) OAuth uses PKCE (Proof Key for Code Exchange) for enhanced security
 - Always validate and sanitize user data before storing in your database
 - Store OAuth tokens securely if you need to access provider APIs later
+
+---
+
+## Documentation
+
+- [R2 File Manager](./docs/filemanager.md) - Complete guide for file uploads, downloads, and management using Cloudflare R2

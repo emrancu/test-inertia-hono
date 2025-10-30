@@ -1,5 +1,6 @@
 import { Context } from "hono";
 import BaseMiddleware from "../core/abstraction/BaseMiddleware";
+import { R2Config } from "./storage";
 // import BaseListener from "../event/BaseListener";
 
 
@@ -168,6 +169,7 @@ type Config = {
 	// eventListener: Events;
 	// queue: QueueConfig;
 	socialAuth?: SocialAuth;
+	r2: R2Config;
 };
 
 export {

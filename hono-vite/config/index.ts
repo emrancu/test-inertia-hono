@@ -7,6 +7,7 @@ import { CsrfConfig } from "./csrf";
 // import { eventListener } from "./event-listener";
 import { middlewaresConfig } from "./middlewares";
 // import { queue } from "./queue";
+import { r2Config } from "./r2";
 import { sessionConfig } from "./session";
 import { socialAuth } from "./social-auth";
 
@@ -21,6 +22,7 @@ const config: Config = {
 	// eventListener: eventListener,
 	// queue: queue,
 	socialAuth: socialAuth,
+	r2: r2Config,
 };
 
 export default config;

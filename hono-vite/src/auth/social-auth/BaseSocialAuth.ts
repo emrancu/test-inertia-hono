@@ -92,10 +92,9 @@ export abstract class BaseSocialAuth {
 		try {
 			const result = await Auth.guard(guard).login(
 				{
-					id: Number(socialUser.id) || socialUser.id,
-					name: socialUser.name,
-					email: socialUser.email || "",
 					...socialUser,
+					id: Number(socialUser.id),
+					email: socialUser.email || "",
 				},
 				{
 					remember: options.remember,
